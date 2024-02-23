@@ -5,7 +5,6 @@ import numpy as np
 
 x0 = 0 #posicao inicial
 p = 0.5 #probabilidade de passo p/ direita e 1-p p/ esquerda
-t = 10 # numero de iteracoes
 
 
 def Caminho_aleatorio(X0,T,p):#primeiro termo é a condição inicial, 2a termo é o numero de iteraçoes
