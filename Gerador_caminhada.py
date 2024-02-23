@@ -45,3 +45,5 @@ N = 100000
 x_lista,x_soma,x_quadrado = Caminhadas_aleatorias_de_max_T(N,x0,p,T_values)
 
 x_lista.tofile('Sample_caminhada_1D.csv', sep = ',')
+x_soma.tofile('Sample_soma_caminhada_1D.csv', sep = ',')
+x_quadrado.tofile('Sample_quadrado_caminhada_1D.csv', sep = ',')
