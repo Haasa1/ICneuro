@@ -93,7 +93,26 @@ def difusion_squared(soma,quadrado,T_values,N):
 sigma = difusion_squared(soma_caminhada,soma_quadrado_caminhada,T_values,N)
 
 print(sigma)
-plt.plot(T_values,sigma)
+#plt.plot(T_values,sigma)
+#plt.grid(True)
+#plt.show()
+
+f = lambda x,a,b: a*x + b
+
+r = scipy.optimize.curve_fit(f, T_values, sigma)[0]
+
+a = r[0]
+b = r[1]
+
+x_fit = np.linspace(T_values[0],T_values[-1],1000)
+y_fit = f(x_fit,a,b)
+
+plt.plot(T_values,sigma,'o')
+plt.plot(x_fit,y_fit,'-r')
+plt.xlabel('time')
+plt.ylabel('Sigma²(difugion)')
+plt.title('Digrama de difusão no tempo')
+plt.text(100,9400,f'a = {r[0]}\nb = {r[1]}',va='top',ha='left')
 plt.grid(True)
 plt.show()
 
