@@ -38,7 +38,7 @@ def Caminhadas_aleatorias_de_max_T(N,x0,p,T_values): #modificado para receber os
         x_soma_quadrado.append(soma_aux_quadrado)
         soma_aux = 0
         soma_aux_quadrado = 0
-    return np.array(x_lista,dtype=float), x_soma, x_soma_quadrado
+    return np.array(x_lista,dtype=float), np.array(x_soma), np.array(x_soma_quadrado)
 
 T_values = [5,10,100,1000,10000]
 N = 100000
