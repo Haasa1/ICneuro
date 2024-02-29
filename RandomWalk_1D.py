@@ -107,13 +107,15 @@ b = r[1]
 x_fit = np.linspace(T_values[0],T_values[-1],1000)
 y_fit = f(x_fit,a,b)
 
-plt.plot(T_values,sigma,'o')
-plt.plot(x_fit,y_fit,'-r')
-plt.xlabel('time')
-plt.ylabel('Sigma²(difugion)')
-plt.title('Digrama de difusão no tempo')
-plt.text(100,9400,f'a = {r[0]}\nb = {r[1]}',va='top',ha='left')
-plt.grid(True)
+fig,ax = plt.subplots(nrows=1,ncols=1)
+
+ax.plot(T_values,sigma,'o')
+ax.plot(x_fit,y_fit,'-r')
+ax.set_xlabel('time')
+ax.set_ylabel('Sigma²(diffusion)')
+ax.set_title('Digrama de difusão no tempo')
+ax.text(100,9400,f'a = {r[0]}\nb = {r[1]}',va='top',ha='left')
+ax.grid(True)
 plt.show()
 
         
