@@ -23,6 +23,7 @@ import scipy.sparse
 import scipy.spatial
 import scipy.optimize
 import scipy.interpolate
+import modules.io as io
 from enum import Enum
 from numba import jit
 
@@ -1659,6 +1660,30 @@ def get_items_by_index(lst,ind):
         items = [items]
     return items
 
+def jackknife_track_sample(input_tracks):
+    """
+    input_tracks is a list of track files containing N mice in each trial
+    (if it is a list of lists -- meaning it is grouped by mouse of trial), the input list will be flattened
+    this function returns N track file lists, each of which has a different mouse removed compared to the input_track list (leave one out procedure)
+
+    each trial must have the same number of mice, otherwise the code will fail
+    """
+    if is_list_of_1d_collection_or_none(input_tracks):
+        input_tracks = list(flatten_list(input_tracks, only_lists=True))
+    input_tracks = io.group_track_list(input_tracks,group_by='trial')[0]
+    N = numpy.max( [ len(tr_group) for tr_group in input_tracks ] ) # max number of mice
+    
+    #assert numpy.all( numpy.array([ len(tr_group) for tr_group in input_tracks ]) == N ), 'All trials must have the same number of mice'
+
+    input_tracks_jk_group = []
+    for k in range(N):
+        g = copy.deepcopy(input_tracks)
+        for n,trial_group in enumerate(g):
+            ind  = list(  set(range(len(trial_group))) - set([k%len(trial_group)])  )
+            g[n] = get_items_by_index(trial_group,ind) # removing mouse k out of N
+        input_tracks_jk_group.append(list(flatten_list(g,only_lists=True)))
+
+    return input_tracks_jk_group
 
 """
 The following functions: jackknife_resampling and jackknife_stats, have been copied from the astropy project.
