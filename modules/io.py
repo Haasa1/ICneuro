@@ -10,7 +10,7 @@
 # that contain all the relevant information for the trajectories
 # extracted from the excel files...
 
-__HAS_WX__ = True
+__HAS_WX__ = False
 
 import os # path and file handling
 import sys
@@ -25,11 +25,6 @@ import scipy.sparse
 import scipy.spatial
 import scipy.optimize
 import scipy.interpolate
-try:
-    import wx # GUI for file picking
-except ImportError:
-    __HAS_WX__ = False
-    pass
 import warnings
 import modules.traj_analysis as tran
 import modules.helper_func_class as misc
@@ -645,37 +640,7 @@ def struct_array_for_scipy(field_names,*fields_data):
     return numpy.core.records.fromarrays([f for f in fields_data],names=fn_list,formats=[object]*len(fn_list))
 
 def get_files_GUI(message='Select file...',path='',wildcard='*.npz',multiple=True,max_num_files=3):
-    if not __HAS_WX__:
-        warnings.warn('No wxPython library found for GUI file picking support...')
-        print('-')
-        print('-')
-        print('-')
-        path = input('Enter a comma-separated file list (full path to each file, up to %d files): '%max_num_files)
-        path = [ p.strip() for p in path.split(',') if ((os.path.exists(p.strip())) and (os.path.isfile(p.strip()))) ]
-        if len(path) == 0:
-            raise ValueError('No valid file was entered')
-        if multiple:
-            if len(path) > max_num_files:
-                path = path[:max_num_files]
-        else:
-            path = path[0]
-        return path
-    app = wx.App(None)
-    style = wx.FD_OPEN | wx.FD_FILE_MUST_EXIST
-    if multiple:
-        style = style | wx.FD_MULTIPLE
-    dialog = wx.FileDialog(None, message, wildcard=wildcard, style=style, defaultDir=path)
-    if dialog.ShowModal() == wx.ID_OK:
-        path = dialog.GetPaths()
-        if multiple:
-            if len(path) > max_num_files:
-                path = path[:max_num_files]
-        else:
-            path = path[0]
-    else:
-        path = None
-    dialog.Destroy()
-    return path
+    return None
 
 def get_track_output_dir(base_dir,file_header):
     return os.path.join(base_dir,'mouse_%s'%file_header.mouse_number)
