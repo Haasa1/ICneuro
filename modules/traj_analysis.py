@@ -897,6 +897,41 @@ def _include_target_in_number_of_checks(d,include_r0,remove_r0_duplicates):
     return d
 
 
+def calc_number_of_checkings_per_hole_from_pos(r,normalize_by='max',
+                                            grouping_hole_horizon=None,sort_result=True):
+    """
+    r                  -> numpy.ndarray with (x,y) position in each row
+    r0                 -> (x,y) position of interest around which this function counts checkings per hole
+    radius_of_interest -> radius around p0
+    2d dispersion:
+    https://en.wikipedia.org/wiki/Covariance_matrix#/media/File:GaussianScatterPCA.svg
+
+    returns:
+        r_un          -> r_un[k,:] == (x,y) coordinates of the hole
+        r_count       -> r_count[k] number of times the hole k appeared (may be normalized by max r_count, by sum of r_count, or just the count itself)
+        r_cov         -> covariance between x and y coordinates
+        r_dispersion  -> sqrt of eigenvalues of the covariance between x and y coordinates (2d-analogous of stddev, each in one of the eigendirections of the covariance matrix)
+        r_eigdir      -> the two eigenvectors indicating the eigendirections of the covariance matrix (as a list, one vector per item)
+                         r_dispersion[m] corresponds to the dispersion in the direction r_eigdir[m]
+    """
+   
+    # calculate the distribution
+    r_un,r_count = _find_unique_positions(r,grouping_hole_horizon)
+    r_un         = numpy.array(r_un)
+    r_count      = numpy.array(r_count,dtype=float)
+    
+    r_mean, r_cov, r_dispersion, r_eigdir = misc.calc_dispersion(r_un,r_count)
+    if (r_count.size == 1):
+        r_count  = r_count[0]*numpy.ones(5)
+        r_un     = numpy.tile(r_un[0,:], (5,1))
+    
+    if _is_valid_normalize_by(normalize_by) and (normalize_by != 'none'):
+        r_count  = r_count / (numpy.max(r_count) if (normalize_by == 'max') else numpy.sum(r_count))
+    if sort_result:
+        ind = numpy.argsort(r_count)
+        r_un,r_count = r_un[ind],r_count[ind]
+    return r_un,r_count,r_mean,r_cov,r_dispersion,r_eigdir
+
 def calc_number_of_checkings_per_hole(track,hole_horizon,threshold_method='ampv',gamma=0.2,normalize_by='max',
                                             grouping_hole_horizon=None,sort_result=True,ignore_entrance_positions=False,
                                             use_velocity_minima=False,velocity_min_prominence=None,velmin_find_peaks_args=None,

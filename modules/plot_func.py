@@ -886,6 +886,106 @@ def _plot_hole_check_spatial_distribution(track,r,r_count,r_target,r_mean,r_eigd
         draw_ellipse(r_mean , r_eigdir , r_disp , ax=ax, **ellipse_args)
     return ax
 
+def _plot_hole_check_spatial_distribution_from_pos(r,r_count,r_target,r_mean,r_eigdir,r_disp,
+                                          r_target2     = None,
+                                          ax            = None,
+                                          panel_label   = ''         , panel_label_args   = None,
+                                          target1_label = ''         , target1_args       = None, target1_label_args = None,
+                                          target2_label = ''         , target2_args       = None, target2_label_args = None,
+                                          show_start    = True       , start_args         = None, start_label_args   = None,
+                                          is_dark_bg    = True       ,
+                                          cmap_name     = 'inferno'  ,
+                                          cmap_start_fraction = 0.0  ,
+                                          color_bg_dark = None       ,
+                                          point_size    = 1e3        ,
+                                          color_target1 = None       ,
+                                          color_target2 = None       ,
+                                          alpha_target1 = 1          ,
+                                          alpha_target2 = 0.35       ,
+                                          show_arena    = True       ,
+                                          scatter_args  = None       ,
+                                          is_target1_present  =   True,
+                                          is_target2_present  =   True,
+                                          show_holes          =  False,
+                                          holes_args          =   None,
+                                          ellipse_args        =   None,
+                                          ellipse_center_args =   None,
+                                          scale_point_size    =   True,
+                                          show_dispersion     =   True,
+                                          scale_color         =   True,
+                                          color_checks_single =   'k' ):
+    """
+    """
+    if not misc.exists(ax):
+        ax=plt.gca()
+    
+    
+    get_color_local = lambda c_is_dark,c_not_dark: c_is_dark if is_dark_bg else c_not_dark
+
+    #color_bg_dark   = color_bg_dark if misc.exists(color_bg_dark) else plt.get_cmap(cmap_name)(numpy.linspace(0,1,100))[0]
+    if not misc.exists(color_bg_dark):
+        if type(cmap_name) is str:
+            color_bg_dark = plt.get_cmap(cmap_name)(numpy.linspace(0,1,100))[0]
+        else:
+            color_bg_dark = cmap_name(numpy.linspace(0,1,100))[0]
+    color_target1         = color_target1 if misc.exists(color_target1) else numpy.array((255, 66, 66,255))/255
+    color_target2         = color_target2 if misc.exists(color_target2) else numpy.array(( 10, 30,211,255))/255
+
+    if show_start:
+        start_label_args = _get_kwargs(start_label_args, fontsize=12,va='bottom',ha='right',color=get_color_local('w','k'),pad=(-4,0))
+        start_args       = _get_kwargs(start_args      , marker='s',markeredgewidth=3,markersize=10,color=get_color_local('w','k'),label='Start',labelArgs=start_label_args)
+
+    #if show_arena:
+    #    holes_args = _get_kwargs(holes_args,markeredgewidth=0.5,color=0.6*numpy.ones(3))
+    #    plot_arena_sketch(track ,showHoles=show_holes,ax=ax,bgCircleArgs=dict(fill=True,edgecolor=get_color_local('w','k'),facecolor=get_color_local(color_bg_dark,'w')),showStart=show_start, startArgs=start_args, holesArgs=holes_args)
+    if len(panel_label) > 0:
+        ax.set_title(panel_label, **_get_kwargs(panel_label_args,fontsize=14, fontweight='bold', color=get_color_local('w','k')))
+    
+    T_r_count = misc.LinearTransf((r_count.min(),r_count.max()),(cmap_start_fraction,r_count.max()))
+
+    scatter_args       = _get_kwargs(scatter_args)
+    min_alpha          = scatter_args.pop('min_alpha',None)
+    alpha_values       = ((1.0-min_alpha)*r_count+min_alpha)                   if misc.exists(min_alpha) else 1.0
+    point_size_to_plot = point_size*r_count                                    if scale_point_size       else point_size
+    color_to_plot      = get_gradient(cmap_name=cmap_name)(T_r_count(r_count)) if scale_color            else color_checks_single
+    ax.scatter(r[:,0] ,r[:,1] ,s=point_size_to_plot,c=color_to_plot,**_get_kwargs(scatter_args,marker='o',edgecolors='none',alpha=alpha_values   ))
+    if misc.exists(r_target):
+        if is_target1_present:
+            edge_color  = get_color_local('w','k')
+            fill_style  = 'full'
+            mface_color = color_target1
+            medge_width = 0.5
+        else:
+            edge_color  = color_target1
+            fill_style  = 'none'
+            mface_color = 'none'
+            medge_width = 2
+        target1_label_args        = _get_kwargs(target1_label_args, fontsize=16, va='bottom',ha='left' , fontweight='bold',color=color_target1 ,pad=( 2,2),alpha=alpha_target1)
+        target1_args              = _get_kwargs(target1_args      , fillstyle=fill_style,markerfacecolor=mface_color,markeredgewidth=medge_width,alpha=alpha_target1,label=target1_label,labelArgs=dict())
+        target1_args['labelArgs'] = target1_label_args
+        plot_point(r_target ,fmt='o',color=edge_color,markersize=7, ax=ax , pointArgs=target1_args)
+    if misc.exists(r_target2):
+        if is_target2_present:
+            edge_color  = get_color_local('w','k')
+            fill_style  = 'full'
+            mface_color = color_target2
+            medge_width = 0.5
+        else:
+            edge_color  = color_target2
+            fill_style  = 'none'
+            mface_color = 'none'
+            medge_width = 2
+        target2_label_args        = _get_kwargs(target2_label_args, fontsize=16, va='bottom',ha='left' , fontweight='bold',color=color_target2 ,pad=( 2,2),alpha=alpha_target2)
+        target2_args              = _get_kwargs(target2_args      , fillstyle=fill_style,markerfacecolor=mface_color,markeredgewidth=medge_width,alpha=alpha_target2,label=target2_label,labelArgs=dict() )
+        target2_args['labelArgs'] = target2_label_args
+        plot_point(r_target2,fmt='o',color=edge_color,markersize=7, ax=ax , pointArgs=target2_args)
+    if show_dispersion:
+        ellipse_args                = _get_kwargs(ellipse_args,show_center=True, facecolor='none', edgecolor=get_color_local('w','k'), linestyle='--', linewidth=2)
+        ellipse_center_args         = _get_kwargs(ellipse_center_args,markeredgewidth=3,color=get_color_local('w','k'),marker='x')
+        ellipse_args['center_args'] = ellipse_center_args
+        draw_ellipse(r_mean , r_eigdir , r_disp , ax=ax, **ellipse_args)
+    return ax
+
 def plot_dispersion(r_mean, r_eigdir, r_disp, ax=None, show_center=True, color=None, marker=None, center_args=None, **ellipse_args):
     """
     plots dispersion returned by misc.calc_dispersion
