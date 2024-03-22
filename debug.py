@@ -27,7 +27,7 @@ def Tamanho_da_Caminhada(L):
     vizinhos = []
     stepprob = []
     for k in range(L*L):
-        vizinhos.append(np.nonzero(np.asarray(A[:,k].todense()).flatten())[0])
+        vizinhos.append(np.nonzero(np.asarray(A[:,[k]].todense()).flatten())[0])
         pstep_vizinhos = pstep * np.ones(vizinhos[-1].size)
         stepprob.append(pstep_vizinhos/np.sum(pstep_vizinhos))
 
